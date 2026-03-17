@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, Component } from 'react';
-import { Sparkles, Menu, X, ChevronRight, ArrowRight, Camera, Trash2, Plus, RefreshCw, Upload, Send, LogIn, LogOut, Globe, User as UserIcon } from 'lucide-react';
+import { Sparkles, Menu, X, ChevronLeft, ChevronRight, ArrowRight, Camera, Trash2, Plus, RefreshCw, Upload, Send, LogIn, LogOut, Globe, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from './lib/utils';
 import { GoogleGenAI } from "@google/genai";
@@ -83,8 +83,14 @@ function Navbar({ user, onLogin, onLogout }: NavbarProps) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-black/5">
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-12">
-          <h1 className="text-2xl font-black tracking-tighter uppercase italic">Studio Moda</h1>
+        <div className="flex items-center gap-4">
+          <img 
+            src="https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=100&h=100" 
+            alt="Terry" 
+            className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shadow-lg"
+            referrerPolicy="no-referrer"
+          />
+          <h1 className="text-2xl font-black tracking-tighter uppercase italic">Modas Terry</h1>
         </div>
         <div className="flex items-center gap-3">
           {user ? (
@@ -121,10 +127,6 @@ const Hero = ({ onOpenUpload, showUpload }: { onOpenUpload: () => void, showUplo
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="flex items-center gap-3 mb-6">
-              <span className="px-3 py-1 bg-black text-white text-[10px] font-black uppercase tracking-widest rounded-full">New Season</span>
-              <span className="text-[10px] font-bold text-black/30 uppercase tracking-widest">Spring / Summer 2026</span>
-            </div>
             <h2 className="text-[12vw] lg:text-[10vw] font-black tracking-tighter leading-[0.85] uppercase italic mb-12">
               Comparte <br />
               <span className="text-emerald-500">Tu Estilo</span>
@@ -304,6 +306,105 @@ const UploadModal = ({ isOpen, onClose, onUpload }: { isOpen: boolean, onClose: 
 };
 
 
+const GalleryModal = ({ 
+  isOpen,
+  items, 
+  currentIndex, 
+  onClose, 
+  onNavigate 
+}: { 
+  isOpen: boolean,
+  items: UserClothing[], 
+  currentIndex: number, 
+  onClose: () => void, 
+  onNavigate: (index: number) => void 
+}) => {
+  const currentItem = items[currentIndex];
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowLeft') onNavigate((currentIndex - 1 + items.length) % items.length);
+      if (e.key === 'ArrowRight') onNavigate((currentIndex + 1) % items.length);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, currentIndex, items.length, onClose, onNavigate]);
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 lg:p-12"
+          onClick={onClose}
+        >
+          <button 
+            onClick={onClose}
+            className="absolute top-8 right-8 p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-[110]"
+          >
+            <X size={24} />
+          </button>
+
+          <div className="absolute left-4 lg:left-12 top-1/2 -translate-y-1/2 z-[110]">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onNavigate((currentIndex - 1 + items.length) % items.length);
+              }}
+              className="p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+            >
+              <ChevronLeft size={32} />
+            </button>
+          </div>
+
+          <div className="absolute right-4 lg:right-12 top-1/2 -translate-y-1/2 z-[110]">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onNavigate((currentIndex + 1) % items.length);
+              }}
+              className="p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+            >
+              <ChevronRight size={32} />
+            </button>
+          </div>
+
+          <motion.div 
+            key={currentIndex}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="relative max-w-5xl w-full h-full flex flex-col items-center justify-center gap-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative w-full h-[70vh] rounded-[48px] overflow-hidden shadow-2xl border border-white/10">
+              <img 
+                src={currentItem.image} 
+                alt="Style" 
+                className="w-full h-full object-contain bg-neutral-900"
+              />
+            </div>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-full border border-white/10 mb-4">
+                <img src={currentItem.userPhoto || ''} className="w-6 h-6 rounded-full" />
+                <span className="text-xs font-black uppercase tracking-widest text-white">{currentItem.userName}</span>
+              </div>
+              <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
+                {currentIndex + 1} / {items.length}
+              </p>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 class ErrorBoundary extends (Component as any) {
   state = { hasError: false };
 
@@ -350,6 +451,7 @@ const AUTHORIZED_EMAIL = "ramon39261@gmail.com";
 function AppContent() {
   const [user, setUser] = useState<User | null>(null);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [feedItems, setFeedItems] = useState<UserClothing[]>([]);
   const [isFeedLoading, setIsFeedLoading] = useState(true);
@@ -519,14 +621,21 @@ function AppContent() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-4 pt-12">
                       {feedItems.filter((_, i) => i % 2 === 0).map((item) => (
-                        <div key={item.id} className="relative aspect-[3/4] rounded-3xl overflow-hidden bg-neutral-900 border border-white/10 group">
+                        <div 
+                          key={item.id} 
+                          className="relative aspect-[3/4] rounded-3xl overflow-hidden bg-neutral-900 border border-white/10 group cursor-pointer"
+                          onClick={() => {
+                            const index = feedItems.findIndex(fi => fi.id === item.id);
+                            setSelectedImageIndex(index);
+                          }}
+                        >
                           <img src={item.image} alt="Style" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
                           <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/5">
                             <img src={item.userPhoto || ''} className="w-4 h-4 rounded-full" />
                             <span className="text-[9px] font-black uppercase tracking-tighter text-white">{item.userName}</span>
                           </div>
                           {user && item.userId === user.uid && (
-                            <div className="absolute top-4 right-4 flex gap-2">
+                            <div className="absolute top-4 right-4 flex gap-2" onClick={(e) => e.stopPropagation()}>
                               {deletingId === item.id ? (
                                 <div className="flex gap-1">
                                   <button 
@@ -558,14 +667,21 @@ function AppContent() {
                     </div>
                     <div className="space-y-4">
                       {feedItems.filter((_, i) => i % 2 !== 0).map((item) => (
-                        <div key={item.id} className="relative aspect-[3/4] rounded-3xl overflow-hidden bg-neutral-900 border border-white/10 group">
+                        <div 
+                          key={item.id} 
+                          className="relative aspect-[3/4] rounded-3xl overflow-hidden bg-neutral-900 border border-white/10 group cursor-pointer"
+                          onClick={() => {
+                            const index = feedItems.findIndex(fi => fi.id === item.id);
+                            setSelectedImageIndex(index);
+                          }}
+                        >
                           <img src={item.image} alt="Style" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
                           <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/5">
                             <img src={item.userPhoto || ''} className="w-4 h-4 rounded-full" />
                             <span className="text-[9px] font-black uppercase tracking-tighter text-white">{item.userName}</span>
                           </div>
                           {user && item.userId === user.uid && (
-                            <div className="absolute top-4 right-4 flex gap-2">
+                            <div className="absolute top-4 right-4 flex gap-2" onClick={(e) => e.stopPropagation()}>
                               {deletingId === item.id ? (
                                 <div className="flex gap-1">
                                   <button 
@@ -619,7 +735,15 @@ function AppContent() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-12 mb-20">
             <div className="col-span-2">
-              <h2 className="text-3xl font-black tracking-tighter uppercase italic mb-6">Studio Moda</h2>
+              <div className="flex items-center gap-4 mb-6">
+                <img 
+                  src="https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=100&h=100" 
+                  alt="Terry" 
+                  className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500 shadow-lg"
+                  referrerPolicy="no-referrer"
+                />
+                <h2 className="text-3xl font-black tracking-tighter uppercase italic">Modas Terry</h2>
+              </div>
               <p className="text-black/40 max-w-xs text-sm leading-relaxed">
                 Redefiniendo la experiencia de moda con tecnología y comunidad.
               </p>
@@ -640,7 +764,7 @@ function AppContent() {
             </div>
           </div>
           <div className="pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-[10px] font-bold text-black/20 uppercase tracking-widest">© 2026 Studio Moda. All rights reserved.</p>
+            <p className="text-[10px] font-bold text-black/20 uppercase tracking-widest">© 2026 Modas Terry. All rights reserved.</p>
             <div className="flex gap-8">
               <a href="#" className="text-[10px] font-bold text-black/20 uppercase tracking-widest hover:text-black transition-colors">Instagram</a>
               <a href="#" className="text-[10px] font-bold text-black/20 uppercase tracking-widest hover:text-black transition-colors">TikTok</a>
@@ -654,6 +778,13 @@ function AppContent() {
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
         onUpload={addToFeed}
+      />
+      <GalleryModal 
+        isOpen={selectedImageIndex !== null}
+        items={feedItems}
+        currentIndex={selectedImageIndex || 0}
+        onClose={() => setSelectedImageIndex(null)}
+        onNavigate={setSelectedImageIndex}
       />
     </div>
   );
