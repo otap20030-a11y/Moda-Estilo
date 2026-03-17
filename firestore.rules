@@ -47,6 +47,10 @@ service cloud.firestore {
              (!('userPhoto' in data) || (data.userPhoto is string && data.userPhoto.size() < 1000));
     }
 
+    function isAuthorizedUploader() {
+      return isAuthenticated() && request.auth.token.email == "ramon39261@gmail.com";
+    }
+
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create, update: if isOwner(userId) && isValidUser(request.resource.data);
@@ -55,7 +59,7 @@ service cloud.firestore {
     match /clothing/{clothingId} {
       allow read: if resource.data.isPublic == true || (isAuthenticated() && resource.data.userId == request.auth.uid);
 
-      allow create: if isAuthenticated() && isValidClothing(request.resource.data);
+      allow create: if isAuthorizedUploader() && isValidClothing(request.resource.data);
                       
       allow update: if isDocOwner() && 
                       isValidClothing(request.resource.data) &&

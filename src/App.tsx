@@ -111,7 +111,7 @@ function Navbar({ user, onLogin, onLogout }: NavbarProps) {
   );
 }
 
-const Hero = ({ onOpenUpload }: { onOpenUpload: () => void }) => (
+const Hero = ({ onOpenUpload, showUpload }: { onOpenUpload: () => void, showUpload: boolean }) => (
   <section className="pt-40 pb-20 px-4 overflow-hidden">
     <div className="max-w-7xl mx-auto">
       <div className="grid lg:grid-cols-12 gap-12 items-end">
@@ -129,15 +129,17 @@ const Hero = ({ onOpenUpload }: { onOpenUpload: () => void }) => (
               Comparte <br />
               <span className="text-emerald-500">Tu Estilo</span>
             </h2>
-            <div className="flex flex-wrap gap-4">
-              <button 
-                onClick={onOpenUpload}
-                className="px-10 py-5 bg-black text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all flex items-center gap-3 shadow-2xl shadow-black/20"
-              >
-                <Upload size={20} />
-                Subir Foto
-              </button>
-            </div>
+            {showUpload && (
+              <div className="flex flex-wrap gap-4">
+                <button 
+                  onClick={onOpenUpload}
+                  className="px-10 py-5 bg-black text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all flex items-center gap-3 shadow-2xl shadow-black/20"
+                >
+                  <Upload size={20} />
+                  Subir Foto
+                </button>
+              </div>
+            )}
           </motion.div>
         </div>
         <div className="lg:col-span-4 hidden lg:block">
@@ -184,7 +186,8 @@ const UploadModal = ({ isOpen, onClose, onUpload }: { isOpen: boolean, onClose: 
 
     const img = new Image();
     img.onload = () => {
-      const canvas = canvasRef.current!;
+      if (!canvasRef.current) return;
+      const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       if (context) {
         const MAX_DIMENSION = 1024;
@@ -209,8 +212,6 @@ const UploadModal = ({ isOpen, onClose, onUpload }: { isOpen: boolean, onClose: 
         
         const data = canvas.toDataURL('image/jpeg', 0.7);
         onUpload(data, isPublic);
-        setIsProcessing(false);
-        setPreview(null);
         onClose();
       }
     };
@@ -247,7 +248,7 @@ const UploadModal = ({ isOpen, onClose, onUpload }: { isOpen: boolean, onClose: 
                   <div className="w-16 h-16 bg-black/5 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <Upload size={32} className="text-black/20" />
                   </div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-black/40">Seleccionar Archivo</p>
+                  <span className="text-xs font-bold uppercase tracking-widest text-black/40">Seleccionar Archivo</span>
                 </>
               )}
               <input 
@@ -289,7 +290,7 @@ const UploadModal = ({ isOpen, onClose, onUpload }: { isOpen: boolean, onClose: 
                 ) : (
                   <>
                     <Plus size={18} />
-                    Compartir Estilo
+                    <span>Compartir Estilo</span>
                   </>
                 )}
               </button>
@@ -343,6 +344,8 @@ export default function App() {
     </ErrorBoundary>
   );
 }
+
+const AUTHORIZED_EMAIL = "ramon39261@gmail.com";
 
 function AppContent() {
   const [user, setUser] = useState<User | null>(null);
@@ -478,8 +481,9 @@ function AppContent() {
         <Hero 
           onOpenUpload={() => {
             if (!user) login();
-            else setIsUploadOpen(true);
+            else if (user.email === AUTHORIZED_EMAIL) setIsUploadOpen(true);
           }}
+          showUpload={user?.email === AUTHORIZED_EMAIL}
         />
 
         <section id="muro" className="py-40 bg-black text-white overflow-hidden">
@@ -493,16 +497,18 @@ function AppContent() {
                 <p className="text-white/60 text-lg mb-12 max-w-md leading-relaxed">
                   Comparte tus mejores outfits con la comunidad subiendo fotos directamente desde tu galería.
                 </p>
-                <button 
-                  onClick={() => {
-                    if (!user) login();
-                    else setIsUploadOpen(true);
-                  }}
-                  className="px-10 py-5 bg-emerald-500 text-black rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-2xl shadow-emerald-500/20 flex items-center gap-3"
-                >
-                  <Upload size={18} />
-                  Subir mis Fotos
-                </button>
+                {user?.email === AUTHORIZED_EMAIL && (
+                  <button 
+                    onClick={() => {
+                      if (!user) login();
+                      else setIsUploadOpen(true);
+                    }}
+                    className="px-10 py-5 bg-emerald-500 text-black rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-2xl shadow-emerald-500/20 flex items-center gap-3"
+                  >
+                    <Upload size={18} />
+                    Subir mis Fotos
+                  </button>
+                )}
               </div>
               <div className="relative">
                 {isFeedLoading ? (
@@ -527,7 +533,7 @@ function AppContent() {
                                     onClick={() => deleteFromFeed(item.id)}
                                     className="p-2 bg-red-600 text-white rounded-full transition-all backdrop-blur-sm shadow-lg z-10 text-[10px] font-bold px-3"
                                   >
-                                    Confirmar
+                                    <span>Confirmar</span>
                                   </button>
                                   <button 
                                     onClick={() => setDeletingId(null)}
@@ -566,7 +572,7 @@ function AppContent() {
                                     onClick={() => deleteFromFeed(item.id)}
                                     className="p-2 bg-red-600 text-white rounded-full transition-all backdrop-blur-sm shadow-lg z-10 text-[10px] font-bold px-3"
                                   >
-                                    Confirmar
+                                    <span>Confirmar</span>
                                   </button>
                                   <button 
                                     onClick={() => setDeletingId(null)}
