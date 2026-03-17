@@ -1,0 +1,42 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "email": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "ClothingItem": {
+      "title": "Clothing Item",
+      "description": "A piece of clothing in a user's closet",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "image": { "type": "string" },
+        "category": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "isPublic": { "type": "boolean" },
+        "userName": { "type": "string" },
+        "userPhoto": { "type": "string" }
+      },
+      "required": ["id", "userId", "image", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/clothing/{clothingId}": {
+      "schema": "ClothingItem",
+      "description": "User clothing items (private and public)"
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "name": "Moda & Estilo",
+  "description": "Una tienda moderna de ropa y accesorios con asistente de estilo inteligente y probador virtual.",
+  "requestFramePermissions": ["camera"]
+}
