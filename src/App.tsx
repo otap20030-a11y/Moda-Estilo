@@ -131,7 +131,6 @@ const Hero = ({ onOpenUpload, showUpload }: { onOpenUpload: () => void, showUplo
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
             <h2 className="text-[12vw] lg:text-[5vw] font-black tracking-tighter leading-[0.85] uppercase italic mb-12">
-              Comparte <br />
               <span className="text-emerald-500">Tu Estilo</span>
             </h2>
             {showUpload && (
